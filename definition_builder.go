@@ -105,6 +105,10 @@ func (b definitionBuilder) addModel(st reflect.Type, nameOverride string) *spec.
 	for i := 0; i < st.NumField(); i++ {
 		field := st.Field(i)
 		jsonName, modelDescription, prop := b.buildProperty(field, &sm, modelName)
+		// 过滤不要的字段
+		if b.isIgnoreField(jsonName, field) {
+			continue
+		}
 		if len(modelDescription) > 0 {
 			modelDescriptions = append(modelDescriptions, modelDescription)
 		}
@@ -159,6 +163,21 @@ func (b definitionBuilder) isPropertyRequired(field reflect.StructField) bool {
 		}
 	}
 	return required
+}
+
+func (b definitionBuilder) isIgnoreField(jsonName string, field reflect.StructField) bool {
+	// 硬编码过滤protobuf生成的 state sizeCache unknownFields
+	if jsonName == "state" && field.Type.String() == "impl.MessageState" {
+		return true
+	}
+	if jsonName == "sizeCache" && field.Type.String() == "int32" {
+		return true
+	}
+	if jsonName == "unknownFields" && field.Type.String() == "[]uint8" {
+		return true
+	}
+	return false
+
 }
 
 func (b definitionBuilder) buildProperty(field reflect.StructField, model *spec.Schema, modelName string) (jsonName, modelDescription string, prop spec.Schema) {
