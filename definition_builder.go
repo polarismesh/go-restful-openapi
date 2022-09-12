@@ -105,6 +105,10 @@ func (b definitionBuilder) addModel(st reflect.Type, nameOverride string) *spec.
 	for i := 0; i < st.NumField(); i++ {
 		field := st.Field(i)
 		jsonName, modelDescription, prop := b.buildProperty(field, &sm, modelName)
+		// 过滤不要的字段
+		if b.isIgnoreField(jsonName, field) {
+			continue
+		}
 		if len(modelDescription) > 0 {
 			modelDescriptions = append(modelDescriptions, modelDescription)
 		}
@@ -154,10 +158,26 @@ func (b definitionBuilder) isPropertyRequired(field reflect.StructField) bool {
 	if jsonTag := field.Tag.Get("json"); jsonTag != "" {
 		s := strings.Split(jsonTag, ",")
 		if len(s) > 1 && s[1] == "omitempty" {
-			return false
+			// 暂时开放不过滤 omitempty
+			return true
 		}
 	}
 	return required
+}
+
+func (b definitionBuilder) isIgnoreField(jsonName string, field reflect.StructField) bool {
+	// 硬编码过滤protobuf生成的 state sizeCache unknownFields
+	if jsonName == "state" && field.Type.String() == "impl.MessageState" {
+		return true
+	}
+	if jsonName == "sizeCache" && field.Type.String() == "int32" {
+		return true
+	}
+	if jsonName == "unknownFields" && field.Type.String() == "[]uint8" {
+		return true
+	}
+	return false
+
 }
 
 func (b definitionBuilder) buildProperty(field reflect.StructField, model *spec.Schema, modelName string) (jsonName, modelDescription string, prop spec.Schema) {
@@ -493,7 +513,7 @@ func (b definitionBuilder) isPrimitiveType(modelName string, modelKind reflect.K
 		return false
 	}
 
-	return strings.Contains("time.Time time.Duration json.Number", modelName)
+	return strings.Contains("time.Time time.Duration json.Number wrapperspb.UInt64Value wrapperspb.StringValue", modelName)
 }
 
 // jsonNameOfField returns the name of the field as it should appear in JSON format
@@ -518,9 +538,11 @@ func (b definitionBuilder) jsonNameOfField(field reflect.StructField) string {
 // see also http://json-schema.org/latest/json-schema-core.html#anchor8
 func (b definitionBuilder) jsonSchemaType(modelName string, modelKind reflect.Kind) string {
 	schemaMap := map[string]string{
-		"time.Time":     "string",
-		"time.Duration": "integer",
-		"json.Number":   "number",
+		"time.Time":              "string",
+		"time.Duration":          "integer",
+		"json.Number":            "number",
+		"wrapperspb.UInt64Value": "integer",
+		"wrapperspb.StringValue": "string",
 	}
 
 	if mapped, ok := schemaMap[modelName]; ok {
@@ -551,12 +573,16 @@ func (b definitionBuilder) jsonSchemaFormat(modelName string, modelKind reflect.
 	}
 
 	schemaMap := map[string]string{
-		"time.Time":      "date-time",
-		"*time.Time":     "date-time",
-		"time.Duration":  "int64",
-		"*time.Duration": "int64",
-		"json.Number":    "double",
-		"*json.Number":   "double",
+		"time.Time":               "date-time",
+		"*time.Time":              "date-time",
+		"time.Duration":           "int64",
+		"*time.Duration":          "int64",
+		"json.Number":             "double",
+		"*json.Number":            "double",
+		"wrapperspb.UInt64Value":  "int64",
+		"wrapperspb.StringValue":  "string",
+		"*wrapperspb.UInt64Value": "int64",
+		"*wrapperspb.StringValue": "string",
 	}
 
 	if mapped, ok := schemaMap[modelName]; ok {
