@@ -1,7 +1,7 @@
 # go-restful-openapi
 
-[![Build Status](https://travis-ci.org/emicklei/go-restful-openapi.png)](https://travis-ci.org/emicklei/go-restful-openapi)
-[![GoDoc](https://godoc.org/github.com/emicklei/go-restful-openapi?status.svg)](https://godoc.org/github.com/emicklei/go-restful-openapi)
+[![Build Status](https://travis-ci.org/polarismesh/go-restful-openapi.png)](https://travis-ci.org/polarismesh/go-restful-openapi)
+[![GoDoc](https://godoc.org/github.com/polarismesh/go-restful-openapi?status.svg)](https://godoc.org/github.com/polarismesh/go-restful-openapi)
 
 [openapi](https://www.openapis.org) extension to the go-restful package, targeting [version 2.0](https://github.com/OAI/OpenAPI-Specification)
 
@@ -30,7 +30,7 @@ Versions `v1` of this package require Go module version `v2` of the go-restful p
 To use version `v3` of the go-restful package, you need to import `v2` of this package, such as:
 
     import (
-        restfulspec "github.com/emicklei/go-restful-openapi/v2"
+        restfulspec "github.com/polarismesh/go-restful-openapi/v2"
 	    restful "github.com/emicklei/go-restful/v3"
     )
 
