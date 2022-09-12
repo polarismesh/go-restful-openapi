@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	restful "github.com/emicklei/go-restful/v3"
+	restfulspec "github.com/polarismesh/go-restful-openapi/v2"
 	"log"
 )
 
