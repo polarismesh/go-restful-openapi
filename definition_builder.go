@@ -104,11 +104,15 @@ func (b definitionBuilder) addModel(st reflect.Type, nameOverride string) *spec.
 
 	for i := 0; i < st.NumField(); i++ {
 		field := st.Field(i)
+		if b.isIgnoreType(field.Type.String()) {
+			continue
+		}
 		jsonName, modelDescription, prop := b.buildProperty(field, &sm, modelName)
 		// 过滤不要的字段
 		if b.isIgnoreField(jsonName, field) {
 			continue
 		}
+		//fmt.Printf("jsonName: %s field: %s \n", jsonName, field.Type.String())
 		if len(modelDescription) > 0 {
 			modelDescriptions = append(modelDescriptions, modelDescription)
 		}
@@ -178,6 +182,13 @@ func (b definitionBuilder) isIgnoreField(jsonName string, field reflect.StructFi
 	}
 	return false
 
+}
+
+func (b definitionBuilder) isIgnoreType(fieldType string) bool {
+	if strings.Contains(fieldType, "impl.") {
+		return true
+	}
+	return strings.Contains("protowire.Number reflect.Type", fieldType)
 }
 
 func (b definitionBuilder) buildProperty(field reflect.StructField, model *spec.Schema, modelName string) (jsonName, modelDescription string, prop spec.Schema) {
@@ -513,7 +524,7 @@ func (b definitionBuilder) isPrimitiveType(modelName string, modelKind reflect.K
 		return false
 	}
 
-	return strings.Contains("time.Time time.Duration json.Number wrapperspb.UInt64Value wrapperspb.StringValue", modelName)
+	return strings.Contains("time.Time time.Duration json.Number wrapperspb.UInt64Value wrapperspb.StringValue wrapperspb.BoolValue wrapperspb.UInt32Value", modelName)
 }
 
 // jsonNameOfField returns the name of the field as it should appear in JSON format
@@ -543,6 +554,8 @@ func (b definitionBuilder) jsonSchemaType(modelName string, modelKind reflect.Ki
 		"json.Number":            "number",
 		"wrapperspb.UInt64Value": "integer",
 		"wrapperspb.StringValue": "string",
+		"wrapperspb.BoolValue":   "boolean",
+		"wrapperspb.UInt32Value": "integer",
 	}
 
 	if mapped, ok := schemaMap[modelName]; ok {
@@ -579,10 +592,14 @@ func (b definitionBuilder) jsonSchemaFormat(modelName string, modelKind reflect.
 		"*time.Duration":          "int64",
 		"json.Number":             "double",
 		"*json.Number":            "double",
-		"wrapperspb.UInt64Value":  "int64",
+		"wrapperspb.UInt64Value":  "integer",
 		"wrapperspb.StringValue":  "string",
-		"*wrapperspb.UInt64Value": "int64",
+		"*wrapperspb.UInt64Value": "integer",
 		"*wrapperspb.StringValue": "string",
+		"wrapperspb.BoolValue":    "boolean",
+		"wrapperspb.UInt32Value":  "integer",
+		"*wrapperspb.BoolValue":   "boolean",
+		"*wrapperspb.UInt32Value": "integer",
 	}
 
 	if mapped, ok := schemaMap[modelName]; ok {

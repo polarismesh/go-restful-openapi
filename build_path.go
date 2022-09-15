@@ -342,7 +342,7 @@ func isPrimitiveType(modelName string) bool {
 	if len(modelName) == 0 {
 		return false
 	}
-	return strings.Contains("uint uint8 uint16 uint32 uint64 int int8 int16 int32 int64 float32 float64 bool string byte rune time.Time time.Duration wrapperspb.UInt64Value wrapperspb.StringValue", modelName)
+	return strings.Contains("uint uint8 uint16 uint32 uint64 int int8 int16 int32 int64 float32 float64 bool string byte rune time.Time time.Duration wrapperspb.UInt64Value wrapperspb.StringValue wrapperspb.BoolValue wrapperspb.UInt32Value", modelName)
 }
 
 func jsonSchemaType(modelName string) string {
@@ -367,6 +367,8 @@ func jsonSchemaType(modelName string) string {
 		"time.Duration":          "integer",
 		"wrapperspb.StringValue": "string",
 		"wrapperspb.UInt64Value": "integer",
+		"wrapperspb.BoolValue":   "boolean",
+		"wrapperspb.UInt32Value": "integer",
 	}
 	mapped, ok := schemaMap[modelName]
 	if !ok {
