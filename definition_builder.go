@@ -346,7 +346,8 @@ func (b definitionBuilder) buildArrayTypeProperty(field reflect.StructField, jso
 	}
 	var pType = "array"
 	prop.Type = []string{pType}
-	isPrimitive := b.isPrimitiveType(fieldType.Elem().Name(), fieldType.Elem().Kind())
+	// isPrimitive := b.isPrimitiveType(fieldType.Elem().Name(), fieldType.Elem().Kind())
+	isPrimitive := b.isPrimitiveType(fieldType.String(), fieldType.Elem().Kind())
 	elemTypeName := b.getElementTypeName(modelName, jsonName, fieldType.Elem())
 	prop.Items = &spec.SchemaOrArray{
 		Schema: &spec.Schema{},
@@ -524,7 +525,7 @@ func (b definitionBuilder) isPrimitiveType(modelName string, modelKind reflect.K
 		return false
 	}
 
-	return strings.Contains("time.Time time.Duration json.Number wrapperspb.UInt64Value wrapperspb.StringValue wrapperspb.BoolValue wrapperspb.UInt32Value", modelName)
+	return strings.Contains("time.Time time.Duration json.Number []*wrapperspb.UInt64Value []*wrapperspb.StringValue []*wrapperspb.BoolValue []*wrapperspb.UInt32Value", modelName)
 }
 
 // jsonNameOfField returns the name of the field as it should appear in JSON format
