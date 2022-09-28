@@ -162,8 +162,7 @@ func (b definitionBuilder) isPropertyRequired(field reflect.StructField) bool {
 	if jsonTag := field.Tag.Get("json"); jsonTag != "" {
 		s := strings.Split(jsonTag, ",")
 		if len(s) > 1 && s[1] == "omitempty" {
-			// 暂时开放不过滤 omitempty
-			return true
+			return false
 		}
 	}
 	return required
