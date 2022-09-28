@@ -26,6 +26,12 @@ func setDefaultValue(prop *spec.Schema, field reflect.StructField) {
 	}
 }
 
+func setExampleValue(prop *spec.Schema, field reflect.StructField) {
+	if tag := field.Tag.Get("example"); tag != "" {
+		prop.Example = stringAutoType(tag)
+	}
+}
+
 func setIsNullableValue(prop *spec.Schema, field reflect.StructField) {
 	if tag := field.Tag.Get("x-nullable"); tag != "" {
 		initPropExtensions(&prop.Extensions)
@@ -126,6 +132,7 @@ func setReadOnly(prop *spec.Schema, field reflect.StructField) {
 func setPropertyMetadata(prop *spec.Schema, field reflect.StructField) {
 	setDescription(prop, field)
 	setDefaultValue(prop, field)
+	setExampleValue(prop, field)
 	setEnumValues(prop, field)
 	setFormat(prop, field)
 	setMinimum(prop, field)
